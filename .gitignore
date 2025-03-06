@@ -1,0 +1,13 @@
+# Backend & Frontend
+node_modules/
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+dist/
+build/
+logs/
+debug.log
+.vscode/
+.idea/
