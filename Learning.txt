@@ -1,0 +1,9 @@
+express – Web framework for Node.js
+cors – Allows cross-origin requests
+dotenv – Loads environment variables
+mongoose – ODM for MongoDB
+mysql2 – MySQL driver for Node.js
+sequelize – ORM for MySQL
+jsonwebtoken – Used for JWT authentication
+bcryptjs – Used for password hashing
+nodemon – Auto-restarts the server on file changes
