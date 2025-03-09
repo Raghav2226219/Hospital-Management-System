@@ -1,0 +1,117 @@
+CREATE TABLE doctors (
+    doctor_id INT PRIMARY KEY,  -- FK from Users table
+    specialization VARCHAR(255) NOT NULL,
+    designation_id INT NOT NULL,  -- FK from Designations table
+    experience_years INT CHECK (experience_years >= 0),  -- Ensures non-negative values
+    hospital_id INT NOT NULL,  -- FK from Hospitals table
+    verified_by_admin BOOLEAN DEFAULT FALSE,
+    license_number VARCHAR(50) UNIQUE NOT NULL,
+    FOREIGN KEY (doctor_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (designation_id) REFERENCES designations(designation_id) ON DELETE CASCADE,
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(hospital_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE appointments (
+    appointment_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    appointment_date DATETIME NOT NULL,
+    status ENUM('pending', 'confirmed', 'completed', 'cancelled') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE Prescriptions (
+    prescription_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    medication_details TEXT NOT NULL,
+    dosage_instructions TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES Doctors(doctor_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Medical_Records (
+    record_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    diagnosis TEXT NOT NULL,
+    prescription_id INT NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES Doctors(doctor_id) ON DELETE CASCADE,
+    FOREIGN KEY (prescription_id) REFERENCES Prescriptions(prescription_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE Medicines (
+    medicine_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    manufacturer VARCHAR(255) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    stock_quantity INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (category_id) REFERENCES medicine_categories(category_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    medicine_id INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    total_price DECIMAL(10,2) NOT NULL CHECK (total_price >= 0),
+    status ENUM('pending', 'shipped', 'delivered') NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (medicine_id) REFERENCES Medicines(medicine_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Job_Postings (
+    job_id INT AUTO_INCREMENT PRIMARY KEY,
+    hospital_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    category_id INT NOT NULL,
+    salary_range VARCHAR(100),
+    experience_required INT CHECK (experience_required >= 0),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (hospital_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES Job_Categories(category_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Job_Applications (
+    application_id INT AUTO_INCREMENT PRIMARY KEY,
+    job_id INT NOT NULL,
+    applicant_id INT NOT NULL,
+    resume_link VARCHAR(500) NOT NULL,
+    status ENUM('applied', 'shortlisted', 'rejected') DEFAULT 'applied',
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (job_id) REFERENCES Job_Postings(job_id) ON DELETE CASCADE,
+    FOREIGN KEY (applicant_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE User_Sessions (
+    session_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    jwt_token TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE bills (
+    bill_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    status ENUM('unpaid', 'paid', 'cancelled') DEFAULT 'unpaid',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
